@@ -1,4 +1,4 @@
-module MyLib (doubleMe) where
+module MyLib where
 
 doubleMe :: Num a => a -> a
 doubleMe x = x + x
@@ -55,8 +55,6 @@ repeat' x = x : repeat' x
 multThree :: (Num a) => a -> a -> a -> a
 multThree x y z = x * y * z
 
-
-
 g' :: Integer -> Integer
 g' x = x + 1
 
@@ -91,3 +89,31 @@ volumeSquare s = volumeRect s s s
 
 xor :: Bool -> Bool -> Bool
 xor p q = (p || q) && not (p && q)
+
+doubleFactorial :: (Eq p, Num p) => p -> p
+doubleFactorial 0 = 1
+doubleFactorial 1 = 1
+doubleFactorial n = n * doubleFactorial (n - 2)
+
+power :: (Eq p, Num p) => p -> p -> p
+power 0 x = 1
+power y x = x * power (y - 1) x
+
+replicate' :: Int -> a -> [a]
+replicate' 1 x = [x]
+replicate' n x = x : replicate' (n -1) x
+
+polynomial :: Int -> [Int] -> Int
+polynomial x [c] = c * power 0 x
+polynomial x coef = power (length coef - 1) x * last coef + polynomial x ((tail . reverse) coef)
+
+square :: Integer -> Integer
+square = power 2
+
+headLong :: Int -> [a] -> [a]
+headLong n (x:xs) = if length l == n then l else x : headLong n xs
+        where 
+            l = x:xs
+
+tailLong :: Int -> [a] -> [a]
+tailLong n x = headLong n (reverse x)
