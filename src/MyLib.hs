@@ -110,10 +110,11 @@ polynomial x coef = power (length coef - 1) x * last coef + polynomial x ((tail 
 square :: Integer -> Integer
 square = power 2
 
-headLong :: Int -> [a] -> [a]
-headLong n (x:xs) = if length l == n then l else x : headLong n xs
-        where 
-            l = x:xs
-
 tailLong :: Int -> [a] -> [a]
-tailLong n x = headLong n (reverse x)
+tailLong n [] = error "headLong of empty list"
+tailLong 1 x = [head x]
+tailLong n (x : xs) = if length l == n then l else tailLong n xs 
+                      where l = x : xs
+
+headLong :: Int -> [a] -> [a]
+headLong n x = reverse $ tailLong n $ reverse x
