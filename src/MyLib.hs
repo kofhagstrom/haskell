@@ -1,5 +1,7 @@
 module MyLib where
 
+import Test.QuickCheck
+
 doubleMe :: Num a => a -> a
 doubleMe x = x + x
 
@@ -110,10 +112,9 @@ polynomial x coef = power (length coef - 1) x * last coef + polynomial x ((tail 
 square :: Integer -> Integer
 square = power 2
 
-
 tailLong :: Int -> [a] -> [a]
 tailLong n [] = error "tailLong of empty list."
-tailLong 1 x = [(head.reverse') x]
+tailLong 1 x = [(head . reverse') x]
 tailLong n all@(x : xs)
   | length all == n = all
   | otherwise = tailLong n xs
@@ -125,6 +126,21 @@ headLong n x = reverse' $ tailLong n $ reverse' x
 headLong' :: Int -> [a] -> [a]
 headLong' n [] = error "headLong' of empty list."
 headLong' 1 x = [head x]
-headLong' n all@(x:xs)
+headLong' n all@(x : xs)
   | length all == n = all
   | otherwise = x : headLong' n xs
+
+prop_headLong :: Int -> [a] -> Property
+prop_headLong n x = not (null x) ==> length (headLong n x) == n
+
+prop_reverse' :: Eq a => [a] -> Bool
+prop_reverse' x = (reverse' . reverse') x == x
+
+argMax :: (Ord a, Num a) => [a] -> a
+argMax [] = error "argMax of empty list."
+argMax [x] = 0
+argMax (x : xs)
+  | x > maxTail = 0
+  | otherwise = 1 + argMax xs
+  where
+    maxTail = maximum' xs
