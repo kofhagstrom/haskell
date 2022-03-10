@@ -1,6 +1,7 @@
 module MyLib where
 
-import Test.QuickCheck
+import Data.Bifunctor (Bifunctor (second))
+import Test.QuickCheck (Property, (==>))
 
 doubleMe :: Num a => a -> a
 doubleMe x = x + x
@@ -41,11 +42,9 @@ fibonacci n = fibonacci (n -1) + fibonacci (n -2)
 maximum' :: (Ord a) => [a] -> a
 maximum' [] = error "maximum of empty list."
 maximum' [x] = x
-maximum' (x : xs)
-  | x > maxTail = x
-  | otherwise = maxTail
-  where
-    maxTail = maximum' xs
+maximum' (x : x' : xs)
+  | x > x' = maximum' (x : xs)
+  | otherwise = maximum' (x' : xs)
 
 reverse' :: [a] -> [a]
 reverse' [] = []
@@ -136,7 +135,7 @@ prop_headLong n x = not (null x) ==> length (headLong n x) == n
 prop_reverse' :: Eq a => [a] -> Bool
 prop_reverse' x = (reverse' . reverse') x == x
 
-argMax :: (Ord a, Num a) => [a] -> a
+argMax :: (Num p, Ord a) => [a] -> p
 argMax [] = error "argMax of empty list."
 argMax [x] = 0
 argMax (x : xs)
@@ -144,3 +143,27 @@ argMax (x : xs)
   | otherwise = 1 + argMax xs
   where
     maxTail = maximum' xs
+
+firstOccurence :: (Eq t, Num p) => t -> [t] -> p
+firstOccurence n [] = error "firstOccurence of empty list"
+firstOccurence n [x] = 0
+firstOccurence n all@(x : xs)
+  | x == n = 0
+  | otherwise = 1 + firstOccurence n xs
+
+prop_firstOccurence :: Eq a => a -> [a] -> Property
+prop_firstOccurence n x = not (null x) ==> x !! firstOccurence n x == n
+
+splitAtFirstOccurence :: Eq a => a -> [a] -> ([a], [a])
+splitAtFirstOccurence n x = second tail split
+  where
+    split = splitAt (firstOccurence n x) x
+
+allOccurences :: (Eq a, Num a) => a -> [a] -> [a]
+allOccurences n [x]
+  | n == x = [0]
+  | otherwise = []
+allOccurences n [] = []
+allOccurences n x = first : map (1 + first +) (allOccurences n ((snd . splitAtFirstOccurence n) x))
+  where
+    first = firstOccurence n x
