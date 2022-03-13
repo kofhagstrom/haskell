@@ -32,9 +32,18 @@ library
     build-depends:    
         base ^>=4.14.3.0,
         QuickCheck
-        
+    
     hs-source-dirs:   src
     default-language: Haskell2010
+
+Test-Suite Test
+    type:       exitcode-stdio-1.0
+    main-is:    Test.hs
+    hs-source-dirs: tests
+    build-depends: 
+        base,
+        hspec,
+        hespec-contrib,
 
 executable haskell
     main-is:          Main.hs
