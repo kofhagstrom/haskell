@@ -1,8 +1,11 @@
 module Main where
 
-import qualified MyLib (someFunc)
-
 main :: IO ()
 main = do
-  putStrLn "Hello, Haskell!"
-  MyLib.someFunc
+  putStrLn "Hello, what is your name?"
+  name <- getLine
+  (putStrLn . greetUser) name
+
+greetUser :: [Char] -> [Char]
+greetUser name = "Hello " ++ name ++ ", I'm Haskell!"
+
