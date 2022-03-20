@@ -13,13 +13,16 @@ doubleUs x y = doubleMe x + doubleMe y
 reLU :: (Ord p, Num p) => p -> p
 reLU x = if x > 0 then x else 0
 
+reLU' :: Integer -> Integer
+reLU' = max 0
+
 removeUppercase :: String -> String
 removeUppercase str = [c | c <- str, c `elem` ['a' .. 'z']]
 
 removeUppercase' :: [Char] -> [Char]
 removeUppercase' = filter (\x -> x `elem` ['a' .. 'z'])
 
-factorial :: (Integral n) => n -> n
+factorial :: (Eq p, Num p) => p -> p
 factorial 0 = 1
 factorial n = n * factorial (n - 1)
 
@@ -43,7 +46,7 @@ fibonacci 1 = 1
 fibonacci n = fibonacci (n - 1) + fibonacci (n -2)
 
 maximum' :: (Ord a) => [a] -> a
-maximum' = foldr1 (\x acc -> if x > acc then x else acc)
+maximum' = foldl1 (\acc x -> if x > acc then x else acc)
 
 reverse'' :: [a] -> [a]
 reverse'' = foldl (\acc x -> x : acc) []
@@ -97,15 +100,23 @@ doubleFactorial 0 = 1
 doubleFactorial 1 = 1
 doubleFactorial n = n * doubleFactorial (n - 2)
 
-replicate' :: (Num a1, Enum a1) => a1 -> a2 -> [a2]
-replicate' n x = map (const x) [1 .. n]
+replicate' :: Int -> a -> [a]
+replicate' n x = take n $ repeat' x
 
 power :: Num a => Int -> a -> a
 power y x = product $ replicate' y x
 
-polynomial :: Int -> [Int] -> Int
-polynomial x [c] = c * power 0 x
-polynomial x coef = power (length coef - 1) x * last coef + polynomial x (init coef)
+polynomial :: Num a => [a] -> a -> [a]
+polynomial coef x = zipWith (curry (\c -> snd c * power (fst c) x)) [0..] coef
+
+taylorSeries :: (Num a1, Num a2, Enum a2) => (a2 -> a1) -> Int -> a1 -> [a1]
+taylorSeries coefGenerator nTerms = polynomial (take nTerms $ map coefGenerator [1..])
+
+expTaylor :: Int -> Double -> [Double]
+expTaylor = taylorSeries (\x' -> x' / factorial' x') 
+
+eulersNumber :: Int -> Double
+eulersNumber nTerms = sum $ expTaylor nTerms 1
 
 square :: Integer -> Integer
 square = power 2
@@ -126,24 +137,21 @@ prop_headLong :: Int -> [a] -> Property
 prop_headLong n x = not (null x) ==> length (headLong n x) == n
 
 listWithIndex :: [b] -> [(Int, b)]
-listWithIndex x = zip [0 .. length x - 1] x
+listWithIndex = zip [0..]
 
-argMax' :: [Int] -> [Int]
-argMax' x = foldr (\x' acc -> if snd x' == argmax then fst x' : acc else acc) [] $ listWithIndex x
-  where
-    argmax = maximum' x
+allOccurences :: Eq b => b -> [b] -> [Int]
+allOccurences n = map fst . filter (\x -> snd x == n) . listWithIndex
 
-allOccurences' :: Eq b => b -> [b] -> [Int]
-allOccurences' n = map fst . foldr (\x acc -> if snd x == n then x : acc else acc) [] . listWithIndex
+argMax :: Ord b => [b] -> [Int]
+argMax x = allOccurences (maximum' x) x
 
 product' :: (Num a) => [a] -> a
-product' = foldl1 (\acc x' -> acc * x')
+product' = foldl1 (*)
 
 factorial' :: (Num a, Enum a) => a -> a
 factorial' n = product' [1..n]
 
 doubleFactorial' :: Integral p => p -> p
-doubleFactorial' n = if even n then product' . filter even $ [1..n] else product' . filter odd $ [1..n]
-
-filter' :: (a -> Bool) -> [a] -> [a]
-filter' f = foldr (\x acc -> if f x then x : acc else acc) []
+doubleFactorial' n
+    | even n = product' $ filter even [1..n]
+    | otherwise = product' $ filter odd [1..n]

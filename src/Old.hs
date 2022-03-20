@@ -69,3 +69,21 @@ headLong' 1 x = [head x]
 headLong' n all@(x : xs)
   | length all == n = all
   | otherwise = x : headLong' n xs
+
+replicate :: (Num a1, Enum a1) => a1 -> a2 -> [a2]
+replicate n x = map (const x) [1 .. n]
+
+listWithIndex :: [b] -> [(Int, b)]
+listWithIndex = zip [0 ..]
+
+power :: Num a => Int -> a -> a
+power y x = product $ replicate' y x
+
+polynomial :: Int -> [Int] -> Int
+polynomial x [c] = c * power 0 x
+polynomial x coef = power (length coef - 1) x * last coef + polynomial x (init coef)
+
+argMax' :: [Int] -> [Int]
+argMax' x = foldr (\x' acc -> if snd x' == argmax then fst x' : acc else acc) [] $ listWithIndex x
+  where
+    argmax = maximum' x

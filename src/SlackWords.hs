@@ -8,3 +8,4 @@ formatChar char
 
 formatString :: String -> String
 formatString = unwords . map (foldl (\acc x -> acc ++ formatChar x) []) . words
+
