@@ -16,6 +16,9 @@ maximum' [] = error "maximum' of empty list."
 maximum' [x] = x
 maximum' (x : xs) = max x (maximum' xs)
 
+maximum'' :: Ord a => [a] -> a
+maximum'' = foldl1 (\acc x -> if x > acc then x else acc)
+
 longestChain :: Integer -> Int
 longestChain = maximum' . lengthOfChains
 
@@ -23,3 +26,5 @@ map' :: (t -> a) -> [t] -> [a]
 map' f [] = []
 map' f (x : xs) = f x : map' f xs
 
+map'' :: Foldable t1 => (t2 -> a) -> t1 t2 -> [a]
+map'' f = foldr (\x acc -> f x : acc) []
