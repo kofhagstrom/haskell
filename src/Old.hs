@@ -87,3 +87,8 @@ argMax' :: [Int] -> [Int]
 argMax' x = foldr (\x' acc -> if snd x' == argmax then fst x' : acc else acc) [] $ listWithIndex x
   where
     argmax = maximum' x
+
+doubleFactorial :: (Eq p, Num p) => p -> p
+doubleFactorial 0 = 1
+doubleFactorial 1 = 1
+doubleFactorial n = n * doubleFactorial (n - 2)

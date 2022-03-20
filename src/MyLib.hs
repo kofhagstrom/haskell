@@ -95,10 +95,11 @@ volumeSquare s = volumeRect s s s
 xor :: Bool -> Bool -> Bool
 xor p q = (p || q) && not (p && q)
 
-doubleFactorial :: (Eq p, Num p) => p -> p
-doubleFactorial 0 = 1
-doubleFactorial 1 = 1
-doubleFactorial n = n * doubleFactorial (n - 2)
+
+doubleFactorial :: Integral p => p -> p
+doubleFactorial n
+    | even n = product' $ filter even [1..n]
+    | otherwise = product' $ filter odd [1..n]
 
 replicate' :: Int -> a -> [a]
 replicate' n x = take n $ repeat' x
@@ -109,14 +110,14 @@ power y x = product $ replicate' y x
 polynomial :: Num a => [a] -> a -> [a]
 polynomial coef x = zipWith (curry (\c -> snd c * power (fst c) x)) [0..] coef
 
-taylorSeries :: (Num a1, Num a2, Enum a2) => (a2 -> a1) -> Int -> a1 -> [a1]
-taylorSeries coefGenerator nTerms = polynomial (take nTerms $ map coefGenerator [1..])
+taylorSeries :: (Num a1, Num a2, Enum a2) => (a2 -> a1) -> a1 -> [a1]
+taylorSeries coefGenerator = polynomial $ map coefGenerator [1..]
 
-expTaylor :: Int -> Double -> [Double]
-expTaylor = taylorSeries (\x' -> x' / factorial' x') 
+expTaylor :: Double -> [Double]
+expTaylor = taylorSeries (\x -> x / factorial' x)
 
 eulersNumber :: Int -> Double
-eulersNumber nTerms = sum $ expTaylor nTerms 1
+eulersNumber nTerms = sum $ take nTerms (expTaylor 1)
 
 square :: Integer -> Integer
 square = power 2
@@ -151,7 +152,3 @@ product' = foldl1 (*)
 factorial' :: (Num a, Enum a) => a -> a
 factorial' n = product' [1..n]
 
-doubleFactorial' :: Integral p => p -> p
-doubleFactorial' n
-    | even n = product' $ filter even [1..n]
-    | otherwise = product' $ filter odd [1..n]
