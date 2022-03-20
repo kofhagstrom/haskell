@@ -1,4 +1,10 @@
 module SlackWords where
 
-f :: String -> String
-f = unwords . map (foldl (\acc x -> if x `elem` alphanumerics then acc ++ ":alphabet-white-" ++ [x] ++ ":" else acc ++ [x]) []) . words where alphanumerics = ['a' .. 'z'] ++ ['A' .. 'Z']
+formatChar :: Char -> String
+formatChar char
+    | char `elem` alphabet = ":alphabet-white-" ++ char : ":"
+    | otherwise = [char]
+    where alphabet = ['a' .. 'z'] ++ ['A' .. 'Z']
+
+formatString :: String -> String
+formatString = unwords . map (foldl (\acc x -> acc ++ formatChar x) []) . words
