@@ -1,15 +1,17 @@
-checkDivisor :: Integral a => a -> a
-checkDivisor n
-    | fizz && buzz = n
-    | fizz = n
-    | buzz = n
-    | otherwise = 0
-    where fizz = n `mod` 3 == 0
-          buzz = n `mod` 5 == 0
+type Rule = (Int, String)
 
-fizzBuzz :: Integral b => b -> [b]
-fizzBuzz n = map checkDivisor [1..n]
+makeCycle :: Rule -> [String]
+makeCycle (length, text) = cycle $ replicate (length -1) "" ++ [text]
 
-fizzBuzzSum :: Integral a => a -> a
-fizzBuzzSum = sum . fizzBuzz
+generalZipWith :: Foldable t => (b -> b -> b) -> t [b] -> [b]
+generalZipWith f = foldl1 (zipWith f)
 
+words' :: [Rule] -> [String]
+words' rules = generalZipWith (++) $ map makeCycle rules
+
+generalFizzBuzz :: [Rule] -> [String]
+generalFizzBuzz rules = zipWith max nums $ words' rules
+    where nums = map show [1 ..]
+
+fizzBuzz :: [String]
+fizzBuzz = generalFizzBuzz [(3, "Fizz"), (5,"Buzz")]
