@@ -8,6 +8,12 @@ sum' :: (Num a) => [a] -> a
 sum' [] = 0
 sum' x = head x + sum' (tail x)
 
+removeUppercase :: String -> String
+removeUppercase str = [c | c <- str, c `elem` ['a' .. 'z']]
+
+reLU :: (Ord p, Num p) => p -> p
+reLU x = if x > 0 then x else 0
+
 firstOccurence :: (Eq t, Num p) => t -> [t] -> p
 firstOccurence n [] = error "firstOccurence of empty list"
 firstOccurence n [x] = 0
