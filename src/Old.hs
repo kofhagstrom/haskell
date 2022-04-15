@@ -115,3 +115,19 @@ fizzBuzz n = map checkDivisor [1 .. n]
 fizzBuzzSum :: Integral a => a -> a
 fizzBuzzSum = sum . fizzBuzz
 
+type Rule = (Int, String)
+
+-- generate an infinite cycle from a Rule
+-- e.g. (3,"Fizz") -> ["","","Fizz","","","Fizz",...]
+cycleFromRule :: Rule -> [String]
+cycleFromRule (length, text) =
+  let cycle' list = list ++ cycle' list
+   in cycle' $ Old.replicate (length -1) "" ++ [text]
+
+-- generate an infinite list of words from a list of rules
+-- e.g. [(3,"Fizz"),(5,"Buzz")] -> ["","","Fizz","","Buzz","Fizz",...]
+listFromRules :: [Rule] -> [String]
+listFromRules rules =
+  let zipWithMany f = foldl1 (zipWith f)
+      cycles = map cycleFromRule rules
+   in zipWithMany (++) cycles
