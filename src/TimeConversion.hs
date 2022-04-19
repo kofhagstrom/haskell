@@ -43,25 +43,22 @@ stringToTime (h1 : h2 : ':' : m1 : m2 : ':' : s1 : s2 : clock) =
         base10 = \acc x -> acc + fst x * 10 ^ snd x
 stringToTime _ = error "Time format incorrect"
 
-stringToMaybeTime :: String -> Maybe Time
-stringToMaybeTime (h1 : h2 : ':' : m1 : m2 : ':' : s1 : s2 : clock) =
-  case length clock of
-    2 -> case clock of
-      "PM" -> Just (Time hour minute second PM)
-      "AM" -> Just (Time hour minute second AM)
-      _ -> Nothing
-    0 -> Just (Time hour minute second Military)
-    _ -> Nothing
+validateTime :: Time -> Time
+validateTime (Time hour minute second clock) =
+  case clock of
+    Military -> validateMilitary (Time hour minute second clock)
+    _ -> validateAMPM (Time hour minute second clock)
   where
-    hour = parseTime [h1, h2]
-    minute = parseTime [m1, m2]
-    second = parseTime [s1, s2]
-    parseTime = calcTime . map digitToInt
-      where
-        calcTime time = foldl base10 0 $ zip (reverse time) [0 ..]
-        base10 = \acc x -> acc + fst x * 10 ^ snd x
-stringToMaybeTime _ = Nothing
-
+    validateMilitary (Time hour minute second clock)
+      | hour < 0 || hour > 23 = error "0 <= Hour <= 23"
+      | minute < 0 || minute > 59 = error "0 <= Minute <= 59"
+      | second < 0 || second > 59 = error "0 <= Second <= 59"
+      | otherwise = Time hour minute second clock
+    validateAMPM (Time hour minute second _)
+      | hour < 0 || hour > 12 = error "0 <= Hour <= 12 for AM/PM."
+      | minute < 0 || minute > 59 = error "0 <= Minute <= 59"
+      | second < 0 || second > 59 = error "0 <= Second <= 59"
+      | otherwise = Time hour minute second clock
 
 convertToMilitary :: Time -> Time
 convertToMilitary (Time hour minute second clock) =
@@ -76,5 +73,5 @@ convertToMilitary (Time hour minute second clock) =
 
 main :: IO ()
 main = do
-  time <- fmap (convertToMilitary . stringToTime) getLine
+  time <- fmap (convertToMilitary . validateTime . stringToTime) getLine
   print time
